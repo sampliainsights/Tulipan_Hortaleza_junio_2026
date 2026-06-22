@@ -1462,7 +1462,7 @@
       position: relative;
       border-radius: var(--r-sm);
       overflow: hidden;
-      min-height: 130px;
+      aspect-ratio: 1 / 1;
       background: var(--bg-input);
       cursor: pointer;
       box-shadow: var(--sh-xs);
@@ -2874,23 +2874,23 @@
             <div class="section-title">Material de campaña</div>
             <div class="section-line"></div>
           </div>
-          <div style="display:flex;gap:16px;align-items:stretch;min-height:440px;" class="media-row">
-            <div class="card" style="flex:2;min-width:0;">
+          <div style="display:flex;flex-direction:column;gap:16px;" class="media-row">
+            <div class="card" style="min-width:0;">
               <div class="card-inner" style="display:flex;flex-direction:column;height:100%;">
                 <div class="card-header">
                   <div class="card-label">Fotos</div>
                   <h3 class="card-question">Fotos de la campaña</h3>
                 </div>
-                <div id="mediaPhotos" style="display:grid;grid-template-columns:repeat(3,1fr);grid-auto-rows:1fr;gap:10px;margin-top:8px;flex:1;"></div>
+                <div id="mediaPhotos" style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:8px;"></div>
               </div>
             </div>
-            <div class="card" style="flex:1;min-width:0;">
+            <div class="card" style="min-width:0;">
               <div class="card-inner" style="display:flex;flex-direction:column;height:100%;">
                 <div class="card-header">
                   <div class="card-label">Vídeo</div>
                   <h3 class="card-question">Vídeo de la campaña</h3>
                 </div>
-                <div id="mediaVideos" style="display:flex;flex-direction:column;justify-content:center;flex:1;margin-top:8px;"></div>
+                <div id="mediaVideos" style="display:flex;flex-direction:column;margin-top:8px;"></div>
               </div>
             </div>
           </div>
@@ -4580,13 +4580,13 @@
     const driveThumb = (id, w) => `https://drive.google.com/thumbnail?id=${id}&sz=w${w}`;
 
     // Lightbox sources (full-size Drive previews)
-    const LB_SRCS = MEDIA_PHOTOS.map(id => driveThumb(id, 1920));
+    const LB_SRCS = MEDIA_PHOTOS.slice(0, 8).map(id => driveThumb(id, 1920));
     let lbIdx = 0;
 
     function buildMedia() {
       const ph = document.getElementById('mediaPhotos');
       if (ph) {
-        ph.innerHTML = MEDIA_PHOTOS.map((id, i) => `
+        ph.innerHTML = MEDIA_PHOTOS.slice(0, 8).map((id, i) => `
           <div class="photo-thumb" onclick="openLightbox(${i})">
             <img src="${driveThumb(id, 1000)}" alt="Foto ${i + 1}" loading="lazy" referrerpolicy="no-referrer">
             <div class="photo-zoom-icon">
