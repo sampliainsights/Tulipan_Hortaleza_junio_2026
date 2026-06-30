@@ -2572,6 +2572,12 @@
               <option value="65+">65+</option>
             </select>
           </div>
+          <div style="margin-top:8px;">
+            <div class="filter-group-label" style="font-size:10px;margin-bottom:4px;">¿Conocías la margarina Tulipán?</div>
+            <select class="filter-select" id="fConoce" style="width:100%;border-radius:var(--r-sm);">
+              <option value="">Todos</option>
+            </select>
+          </div>
           <div style="margin-top:10px;font-size:10px;color:var(--txt-3);" id="sidebarFilterCount"></div>
         </div>
 
@@ -4395,15 +4401,34 @@
     // ── POPULATE FILTERS (ubicación filter is static; no-op kept for compatibility) ──
     function populateProductFilter() { /* ubicación filter is statically populated */ }
 
+    // Column id for "¿Conocías la margarina Tulipán?"
+    const CONOCE_COL = 'Ksexwh72XVNUtg0bfOTb';
+
+    // Populate the "¿Conocías la margarina Tulipán?" filter from the distinct values present in the data
+    function populateConoceFilter() {
+      const sel = document.getElementById('fConoce');
+      if (!sel) return;
+      const idx = getIdx(CONOCE_COL);
+      const prev = sel.value;
+      const seen = new Map(); // norm -> original display value
+      getColData(allRows, idx).forEach(v => { const k = norm(v); if (!seen.has(k)) seen.set(k, v); });
+      const values = [...seen.values()].sort((a, b) => a.localeCompare(b, 'es'));
+      sel.innerHTML = '<option value="">Todos</option>' + values.map(v => `<option value="${v.replace(/"/g, '&quot;')}">${v}</option>`).join('');
+      if ([...sel.options].some(o => o.value === prev)) sel.value = prev;
+    }
+
     // ── FILTER ──
     function getFiltered() {
       const g = document.getElementById('fGender').value;
       const a = document.getElementById('fAge').value;
+      const c = document.getElementById('fConoce').value;
       const gIdx = COL['_gender'] !== undefined ? COL['_gender'] : -1;
       const aIdx = COL['_age'] !== undefined ? COL['_age'] : -1;
+      const cIdx = getIdx(CONOCE_COL);
       return allRows.filter(r => {
         if (g && gIdx >= 0) { const v = norm((r[gIdx] || '').toString()); const isF = v.startsWith('f') || v === 'mujer' || v === 'femenino'; const isM = v.startsWith('m') || v === 'hombre' || v === 'masculino'; if (g === 'F' && !isF) return false; if (g === 'M' && !isM) return false; }
         if (a && aIdx >= 0) { const ag = ageGroup((r[aIdx] || '').toString()); if (!ag || ag !== a) return false; }
+        if (c && cIdx >= 0) { if (norm((r[cIdx] || '').toString()) !== norm(c)) return false; }
         return true;
       });
     }
@@ -4484,6 +4509,7 @@
         detectColumns(allHeaders);
         allRows = merged;
         buildDynamicCharts();
+        populateConoceFilter();
         render(getFiltered());
         const b = document.getElementById('dataBanner'); if (b) b.remove();
         const now = new Date(); document.getElementById('lastUpdate').textContent = `Actualizado ${now.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}`;
@@ -4498,7 +4524,7 @@
     }
 
     // ── EVENTS ──
-    ['fGender', 'fAge'].forEach(id => {
+    ['fGender', 'fAge', 'fConoce'].forEach(id => {
       document.getElementById(id).addEventListener('change', () => render(getFiltered()));
     });
     document.getElementById('lastUpdate').addEventListener('click', fetchData);
